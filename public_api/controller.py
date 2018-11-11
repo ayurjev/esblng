@@ -145,7 +145,7 @@ class DefaultPublicController(Controller):
         """
         token = request.get("token")
         login = microservice("http://auth/auth", {"token": token}, "result")
-        base_currency = request.get("base_currency")
+        from_base_currency = request.get("from_base_currency")
 
         to_login = request.get("to_login")
         to_base_currency = request.get("to_base_currency")
@@ -157,7 +157,7 @@ class DefaultPublicController(Controller):
         return microservice(
             "http://wallets/transfer",
             {
-                "from_login": login, "from_base_currency": base_currency,
+                "from_login": login, "from_base_currency": from_base_currency,
                 "to_login": to_login, "to_base_currency": to_base_currency,
                 "amount": amount,
                 "conversion_rate_uuid_1": conversion_rate_uuid_1,
