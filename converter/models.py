@@ -72,7 +72,7 @@ class ClickHouse:
     def get_last_value(base_currency: int):
 
         if base_currency == Currencies.USD:
-            return 1
+            return {"uuid": None, "value": 1, "base_currency": base_currency, "datetime": None}
 
         res = ClickHouse().execute(
             "SELECT `uuid`, `value`, `datetime` FROM `rates_revisions` WHERE `base_currency` = %d "

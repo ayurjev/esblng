@@ -93,12 +93,13 @@ class Cities(CollectionModel):
         if not country:
             raise CountryNotFound()
 
-        bounds = {"name": city_name, "country_id": country_id}
+
         if city_id:
-            city = Cities().get_item(bounds)
+            city = Cities().get_item({"id": city_id, "country_id": country_id})
             if not city:
                 raise CityNotFound()
         else:
+            bounds = {"name": city_name, "country_id": country_id}
             city = Cities().get_item(bounds) or City(bounds).save()
 
         return city.describe()

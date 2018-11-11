@@ -47,7 +47,7 @@ class TestWrapper(unittest.TestCase):
     @staticmethod
     def reset_clickhouse():
         clickhouse_manager = ClickHouseManager()
-        clickhouse_manager.execute(f"DROP TABLE IF EXISTS lists_content")
+        clickhouse_manager.execute(f"DROP TABLE IF EXISTS `rates_revisions`")
         clickhouse_manager.execute("""
             CREATE TABLE IF NOT EXISTS `rates_revisions`
             (

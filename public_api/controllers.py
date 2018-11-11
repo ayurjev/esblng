@@ -74,10 +74,14 @@ class DefaultPublicController(Controller):
         """
         token = request.get("token")
         login = microservice("http://auth/auth", {"token": token}, "result")
-        user = microservice("http://users/get", {"login": login}, "result")
-        user["country_name"] = microservice("http://geo/get_country", {"id": user["country_id"]}, "result.name")
-        user["city_name"] = microservice("http://geo/get_city", {"id": user["city_id"]}, "result.name")
         wallets = microservice("http://wallets/get_wallets", {"login": login}, "result")
+        user = microservice("http://users/get", {"login": login}, "result")
+        user["country_name"] = microservice(
+            "http://geo/get_country", {"id": user["country_id"]}, "result.name"
+        )
+        user["city_name"] = microservice(
+            "http://geo/get_city", {"id": user["city_id"], "country_id": user["country_id"]}, "result.name"
+        )
         return {**user, "wallets": wallets}
 
     @classmethod
