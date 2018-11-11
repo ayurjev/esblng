@@ -1,4 +1,3 @@
-""" Exceptions """
 
 from envi import BaseServiceException
 

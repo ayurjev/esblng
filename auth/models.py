@@ -1,4 +1,3 @@
-""" Модели """
 
 import os
 import hashlib

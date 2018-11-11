@@ -1,0 +1,16 @@
+
+version: '2'
+
+services:
+
+  converter:
+    container_name: converter
+    build: .
+    env_file:
+     - .env
+    volumes:
+     - .:/var/www
+
+  clickhouse:
+    container_name: clickhouse
+    image: yandex/clickhouse-server
