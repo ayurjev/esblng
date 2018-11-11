@@ -1,0 +1,61 @@
+
+version: '3.3'
+services:
+
+  public_api:
+    build:
+      context: ../public_api
+    env_file:
+     - .env
+
+  private_api:
+    build:
+      context: ../private_api
+    env_file:
+     - .env
+
+  auth:
+    build:
+      context: ../auth
+    env_file:
+     - .env
+    environment:
+     - MYSQL_USER=auth
+     - MYSQL_PASS=773063dd3c266fd1
+     - MYSQL_DBNAME=auth
+
+  geo:
+    build:
+      context: ../geo
+    env_file:
+     - .env
+    environment:
+     - MYSQL_USER=geo
+     - MYSQL_PASS=eef3f7dad35e31aa
+     - MYSQL_DBNAME=geo
+
+  users:
+    build:
+      context: ../users
+    env_file:
+     - .env
+    environment:
+     - MYSQL_USER=users
+     - MYSQL_PASS=b96a0fe6fb3060b3
+     - MYSQL_DBNAME=users
+
+  wallets:
+    build:
+      context: ../wallets
+    env_file:
+     - .env
+    environment:
+     - MYSQL_USER=wallets
+     - MYSQL_PASS=f25996ab2a695824
+     - MYSQL_DBNAME=wallets
+
+  converter:
+    build:
+      context: ../converter
+    env_file:
+     - .env

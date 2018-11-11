@@ -26,7 +26,7 @@ RUN set -ex \
       && apk del .build-deps
 
 COPY migrate.py /usr/local/lib/python3.6/site-packages/migrate.py
-
+COPY migrate.py /migrate.py
 COPY uwsgi.ini /uwsgi.ini
 COPY start.sh /start.sh
 RUN chmod a+x /start.sh

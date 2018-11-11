@@ -13,6 +13,6 @@ services:
 
   db:
     container_name: db
-    image: registry.dcapi.net/dcpro/main/base/mysql
+    image: esblng/base/mysql
     env_file:
      - .env

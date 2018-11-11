@@ -1,5 +1,5 @@
-from dc.envi import Controller, Request, microservice, response_format
-from models.Utils import cors
+from envi import Controller, Request, microservice, response_format
+from utils import cors
 
 
 # noinspection PyPep8Naming,PyAbstractClass

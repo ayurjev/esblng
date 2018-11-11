@@ -51,20 +51,12 @@ def migrate(**kwargs):
         'dbname': os.environ.get("MYSQL_DBNAME")
     }
 
-    if os.environ.get("DEPLOY_MODE") != "PROD":
-        connect_config = {
-            'host': os.environ.get("MYSQL_HOST"),
-            'port': os.environ.get("MYSQL_PORT"),
-            'user': "root",
-            'password': ""
-        }
-    else:
-        connect_config = {
-            'host': os.environ.get("MYSQL_HOST"),
-            'port': os.environ.get("MYSQL_PORT"),
-            'user': os.environ.get("MYSQL_USER"),
-            'password': os.environ.get("MYSQL_PASS")
-        }
+    connect_config = {
+        'host': os.environ.get("MYSQL_HOST"),
+        'port': os.environ.get("MYSQL_PORT"),
+        'user': "root",
+        'password': ""
+    }
 
     if "quiet" in kwargs:
         pprint = lambda x: None
