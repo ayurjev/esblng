@@ -49,6 +49,8 @@ class TestWrapper(unittest.TestCase):
     def reset_clickhouse():
         clickhouse_manager = ClickHouseManager()
         clickhouse_manager.execute(f"DROP TABLE IF EXISTS `rates_revisions`")
+        clickhouse_manager.execute(f"DROP TABLE IF EXISTS `incoming_transactions`")
+        clickhouse_manager.execute(f"DROP TABLE IF EXISTS `outgoing_transactions`")
         clickhouse_manager.execute("""
             CREATE TABLE IF NOT EXISTS `rates_revisions`
             (
@@ -64,19 +66,51 @@ class TestWrapper(unittest.TestCase):
             """
         )
 
+        clickhouse_manager.execute("""
+            CREATE TABLE IF NOT EXISTS `incoming_transactions`
+            (
+                tx_uuid String,
+                login String,
+                base_currency Int8,
+                amount Float64,
+                cr_uuid String,
+                datetime Datetime
+            )
+            ENGINE MergeTree()
+            PARTITION BY (datetime)
+            ORDER BY (login, datetime) SETTINGS index_granularity=8192;
+        """)
+
+        clickhouse_manager.execute("""
+            CREATE TABLE IF NOT EXISTS `outgoing_transactions`
+            (
+                tx_uuid String,
+                login String,
+                base_currency Int8,
+                amount Float64,
+                cr_uuid String,
+                datetime Datetime
+            )
+            ENGINE MergeTree()
+            PARTITION BY (datetime)
+            ORDER BY (login, datetime) SETTINGS index_granularity=8192;
+        """)
+
 
 class ClickHouseManager:
     @staticmethod
     def execute(query: str, data=None):
-        host = os.environ.get("CLICKHOUSE_HOST")
-        port = os.environ.get("CLICKHOUSE_PORT")
-        user = os.environ.get("CLICKHOUSE_USER")
-        pasw = os.environ.get("CLICKHOUSE_PASSWORD")
-        client = ClickHouseClient(host, port=port, user=user, password=pasw)
+        if os.environ.get("DEPLOY_MODE") != "PROD":
+            client = ClickHouseClient('clickhouse')
+        else:
+            host = os.environ.get("CLICKHOUSE_HOST")
+            port = os.environ.get("CLICKHOUSE_PORT")
+            user = os.environ.get("CLICKHOUSE_USER")
+            pasw = os.environ.get("CLICKHOUSE_PASSWORD")
+            client = ClickHouseClient(host, port=port, user=user, password=pasw)
         res = client.execute(query, data)
         client.disconnect()
         return res
-
 
 
 if __name__ == '__main__':

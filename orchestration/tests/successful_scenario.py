@@ -140,7 +140,8 @@ class TestCase(TestWrapper):
             },
             "result"
         )
-        self.assertTrue(transfer_result)
+        tx_uuid = transfer_result["uuid"]
+        tx_datetime = transfer_result["datetime"]
 
         # Final checking:
         user_wallets = microservice("http://public_api/getMe", {"token": token}, "result.wallets")
@@ -152,4 +153,45 @@ class TestCase(TestWrapper):
             user_wallets
         )
 
+        # And last thing to check... getting reports on transactions via private api:
+        transactions_history = microservice(
+            "http://private_api/getTransactions",
+            {"login": "MyLogin"},
+            "result"
+        )
+
+        self.assertDictEqual(
+            {
+                "incoming": [
+                    [tx_uuid, "MyLogin", 4, 400.0, cny_uuid, tx_datetime]
+                ],
+                "outgoing": [
+                    [tx_uuid, "MyLogin", 1, 100.0, '', tx_datetime]
+                ],
+            },
+            transactions_history
+        )
+
+        # Aaand downloading csv report:
+        import requests
+        res = requests.post("http://private_api/getTransactionsCsvReport", json={"login": "MyLogin"})
+
+        # Looks like csv and should be downloadable:
+        self.assertEqual("application/vnd.ms-excel", res.headers.get("Content-Type"))
+        self.assertEqual("attachment; filename=transactions-MyLogin.csv", res.headers.get("Content-Disposition"))
+
+        # What about content:
+        csv_content = res.content.decode()
+        lines = csv_content.split("\r\n")
+        csv_header = lines.pop(0)
+        body = [line.split(",") for line in lines]
+
+        self.assertEqual(
+            ["tx_uuid", "login", "base_currency", "amount", "convertion_rate_uuid", "tx_datetime", "mode"],
+            csv_header.split(",")
+        )
+        self.assertIn([tx_uuid, "MyLogin", "4", "400.0", cny_uuid, tx_datetime, "+"], body)
+        self.assertIn([tx_uuid, "MyLogin", "1", "100.0", "", tx_datetime, "-"], body)
+
         # Profit! =)
+        # Thanks for your attention =)
