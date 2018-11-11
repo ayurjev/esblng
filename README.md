@@ -29,7 +29,7 @@
 ```
 
 
-# Остановить все приложение
+Остановить все приложение
 
 ```
 ./down.sh
@@ -44,3 +44,9 @@ https://github.com/ayurjev/esblng/tree/master/public_api
 # Документация по Private Api:
 
 https://github.com/ayurjev/esblng/tree/master/private_api
+
+
+# Прочитать интеграционный тест с комментариями:
+
+https://github.com/ayurjev/esblng/blob/master/orchestration/tests/successful_scenario.py
+
