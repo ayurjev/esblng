@@ -33,7 +33,10 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("base_currency", Currencies.CNY)
         last_value = json.loads(DefaultController.get_last_value(r))["result"]
         self.assertEqual(
-            {"uuid": last_value["uuid"], "value": 3.467789, "base_currency": Currencies.CNY},
+            {
+                "uuid": last_value["uuid"], "value": 3.467789,
+                "base_currency": Currencies.CNY, "datetime": last_value["datetime"]
+            },
             last_value
         )
 
@@ -41,7 +44,10 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("base_currency", Currencies.EUR)
         last_value = json.loads(DefaultController.get_last_value(r))["result"]
         self.assertEqual(
-            {"uuid": last_value["uuid"], "value": 1.246778, "base_currency": Currencies.EUR},
+            {
+                "uuid": last_value["uuid"], "value": 1.246778,
+                "base_currency": Currencies.EUR, "datetime": last_value["datetime"]
+            },
             last_value
         )
 
@@ -50,7 +56,10 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("uuid", last_value["uuid"])
         last_value = json.loads(DefaultController.get_by_uuid(r))["result"]
         self.assertEqual(
-            {"uuid": last_value["uuid"], "value": 1.246778, "base_currency": Currencies.EUR},
+            {
+                "uuid": last_value["uuid"], "value": 1.246778,
+                "base_currency": Currencies.EUR, "datetime": last_value["datetime"]
+            },
             last_value
         )
 
@@ -74,7 +83,10 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("base_currency", Currencies.EUR)
         last_value = json.loads(DefaultController.get_last_value(r))["result"]
         self.assertEqual(
-            {"uuid": last_value["uuid"], "value": 1.2, "base_currency": Currencies.EUR},
+            {
+                "uuid": last_value["uuid"], "value": 1.2,
+                "base_currency": Currencies.EUR, "datetime": last_value["datetime"]
+            },
             last_value
         )
 
@@ -82,6 +94,9 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("base_currency", Currencies.CNY)
         last_value = json.loads(DefaultController.get_last_value(r))["result"]
         self.assertEqual(
-            {"uuid": last_value["uuid"], "value": 3.4, "base_currency": Currencies.CNY},
+            {
+                "uuid": last_value["uuid"], "value": 3.4,
+                "base_currency": Currencies.CNY, "datetime": last_value["datetime"]
+            },
             last_value
         )

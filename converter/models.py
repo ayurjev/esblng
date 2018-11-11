@@ -76,7 +76,7 @@ class ClickHouse:
             "" % base_currency
         )
         if res:
-            return {"uuid": res[0][0], "value": res[0][1], "base_currency": base_currency}
+            return {"uuid": res[0][0], "value": res[0][1], "base_currency": base_currency, "datetime": res[0][2]}
         else:
             raise UnknownRatesInformation()
 
@@ -88,6 +88,6 @@ class ClickHouse:
             )
         )
         if res:
-            return {"uuid": uuid, "value": res[0][1], "base_currency": res[0][0]}
+            return {"uuid": uuid, "value": res[0][1], "base_currency": res[0][0], "datetime": res[0][2]}
         else:
             raise UnknownRatesInformation()

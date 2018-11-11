@@ -46,4 +46,9 @@ class DefaultController(Controller):
         to_login = request.get("to_login")
         to_base_currency = request.get("to_base_currency", None)
         amount = int(request.get("amount", 0))
-        return Wallets.transfer(from_login, from_base_currency, to_login, to_base_currency, amount)
+        conversion_rate_uuid_1 = request.get("conversion_rate_uuid_1", None)
+        conversion_rate_uuid_2 = request.get("conversion_rate_uuid_2", None)
+        return Wallets.transfer(
+            from_login, from_base_currency, to_login, to_base_currency,
+            amount, conversion_rate_uuid_1, conversion_rate_uuid_2
+        )
