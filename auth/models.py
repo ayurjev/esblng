@@ -83,7 +83,7 @@ class CredentialsRecords(CollectionModel):
         """ authenticating with token """
         match = CredentialsRecords().get_item({"token": token})
         if match:
-            return True
+            return match.login
         else:
             raise IncorrectToken()
 

@@ -1,0 +1,11 @@
+
+version: '2'
+
+services:
+  public_api:
+    container_name: public_api
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - .:/var/www

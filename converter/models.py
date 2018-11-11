@@ -70,6 +70,10 @@ class ClickHouse:
 
     @staticmethod
     def get_last_value(base_currency: int):
+
+        if base_currency == Currencies.USD:
+            return 1
+
         res = ClickHouse().execute(
             "SELECT `uuid`, `value`, `datetime` FROM `rates_revisions` WHERE `base_currency` = %d "
             "ORDER BY `datetime`, `inserted` DESC LIMIT 1"

@@ -24,6 +24,13 @@ class DefaultController(Controller):
 
     @classmethod
     @response_format
+    def get_wallets(cls, request: Request, **kwargs):
+        """ Retreiving wallet's data """
+        login = request.get("login")
+        return Wallets.get_wallets(login)
+
+    @classmethod
+    @response_format
     def get_currencies(cls, request: Request, **kwargs):
         """ Retreiving list of supported currencies """
         return Wallets.get_currencies()

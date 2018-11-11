@@ -155,6 +155,12 @@ class Wallets(CollectionModel):
         return wallet
 
     @staticmethod
+    def get_wallets(login: str):
+        """ Retrieves all wallets for `login` """
+        bounds = {"login": login}
+        return [w.describe() for w in Wallets().get_items(bounds)]
+
+    @staticmethod
     def get_currencies() -> dict:
         """ Retrieves all supported base currencies (codes and names) """
         return Currencies.NAMES
