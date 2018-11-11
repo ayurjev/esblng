@@ -1,11 +1,10 @@
-""" Контроллеры сервиса """
 
 from envi import Controller, Request, response_format
 from models import CredentialsRecords
 
+
 # noinspection PyAbstractClass
 class DefaultController(Controller):
-    """ Контроллер """
 
     @classmethod
     @response_format

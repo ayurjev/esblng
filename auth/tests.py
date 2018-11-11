@@ -60,7 +60,7 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("login", 'MyLogin')
         r.set("password", "MySecret")
         self.assertEqual(
-            {"error": {"code": "DC_AUTH_4", "message": "Already registred"}},
+            {"error": {"code": "AUTH_4", "message": "Already registred"}},
             json.loads(DefaultController.create(r))
         )
 
@@ -69,7 +69,7 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("login", 'BadLogin')
         r.set("password", "MySecret")
         self.assertEqual(
-            {"error": {"code": "DC_AUTH_1", "message": "Incorrect login"}},
+            {"error": {"code": "AUTH_1", "message": "Incorrect login"}},
             json.loads(DefaultController.auth(r))
         )
 
@@ -78,7 +78,7 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("login", 'MyLogin')
         r.set("password", "BadPassword")
         self.assertEqual(
-            {"error": {"code": "DC_AUTH_2", "message": "Incorrect password"}},
+            {"error": {"code": "AUTH_2", "message": "Incorrect password"}},
             json.loads(DefaultController.auth(r))
         )
 
@@ -86,6 +86,6 @@ class DefaultControllerTestCase(unittest.TestCase):
         r = Request()
         r.set("token", "BadToken")
         self.assertEqual(
-            {"error": {"code": "DC_AUTH_3", "message": "Incorrect token"}},
+            {"error": {"code": "AUTH_3", "message": "Incorrect token"}},
             json.loads(DefaultController.auth(r))
         )
