@@ -20,10 +20,30 @@ class DefaultController(Controller):
         """ Retreiving wallet's data """
         login = request.get("login")
         base_currency = request.get("base_currency", None)
-        return Wallets.get(login, base_currency)
+        return Wallets.get(login, base_currency).describe()
 
     @classmethod
     @response_format
     def get_currencies(cls, request: Request, **kwargs):
         """ Retreiving list of supported currencies """
         return Wallets.get_currencies()
+
+    @classmethod
+    @response_format
+    def topup(cls, request: Request, **kwargs):
+        """ Top up wallet's balance """
+        login = request.get("login")
+        base_currency = request.get("base_currency", None)
+        amount = int(request.get("amount", 0))
+        return Wallets.top_up(login, base_currency, amount)
+
+    @classmethod
+    @response_format
+    def transfer(cls, request: Request, **kwargs):
+        """ Transfer funds from one wallet to another """
+        from_login = request.get("from_login")
+        from_base_currency = request.get("from_base_currency", None)
+        to_login = request.get("to_login")
+        to_base_currency = request.get("to_base_currency", None)
+        amount = int(request.get("amount", 0))
+        return Wallets.transfer(from_login, from_base_currency, to_login, to_base_currency, amount)
