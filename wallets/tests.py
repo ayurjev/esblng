@@ -4,7 +4,7 @@ from datetime import datetime
 
 from migrate import migrate
 from envi import Request
-from models import pool, Currencies
+from models import pool, Currencies, ClickHouse
 from controllers import DefaultController
 
 
@@ -16,6 +16,17 @@ class DefaultControllerTestCase(unittest.TestCase):
             db.execute_raw("DROP DATABASE IF EXISTS wallets")
             migrate(quiet=True)
             db.execute_raw("USE wallets")
+
+        self.clickhouse = ClickHouse()
+        self.clickhouse.execute('''DROP TABLE IF EXISTS `outgoing_transactions`''')
+        self.clickhouse.execute('''DROP TABLE IF EXISTS `incoming_transactions`''')
+        with open("clickhouse_migrations/01-incoming-transactions.sql") as f:
+            self.clickhouse.execute("".join(f.readlines()))
+        with open("clickhouse_migrations/02-outgoing-transactions.sql") as f:
+            self.clickhouse.execute("".join(f.readlines()))
+
+    def tearDown(self):
+        self.clickhouse.disconnect()
 
     def test_wallets(self):
         # Creating:
@@ -66,7 +77,6 @@ class DefaultControllerTestCase(unittest.TestCase):
             {"code": "WALLETS_1", "message": "Unsupported Currency"},
             json.loads(DefaultController.create(r))["error"]
         )
-
 
     def test_topup_wallet_balance(self):
         r = Request()
@@ -339,8 +349,10 @@ class DefaultControllerTestCase(unittest.TestCase):
         r.set("conversion_rate_uuid_1", "CNY-USD")
         r.set("conversion_rate_uuid_2", "USD-EUR")
         r.set("amount", 10)
-        result = json.loads(DefaultController.transfer(r))["result"]
-        self.assertTrue(result)
+        tx_result = json.loads(DefaultController.transfer(r))["result"]
+        tx_uuid = tx_result["uuid"]
+        tx_datetime = tx_result["datetime"]
+        self.assertEqual(36, len(tx_uuid))
 
         # Check:
         r = Request()
@@ -355,6 +367,23 @@ class DefaultControllerTestCase(unittest.TestCase):
             {"login": "MyLogin", "base_currency": Currencies.EUR, "balance": 2.0833},
             json.loads(DefaultController.get(r))["result"]
         )
+
+        # Check reports:
+        r = Request()
+        r.set("login", "MyLogin")
+        self.assertEqual(
+            {
+                "incoming": [
+                    [tx_uuid, "MyLogin", Currencies.EUR, 2.0833, "USD-EUR", tx_datetime]
+                ],
+                "outgoing": [
+                    [tx_uuid, "MyLogin", Currencies.CNY, 10.0, "CNY-USD", tx_datetime]
+                ],
+            },
+            json.loads(DefaultController.get_transactions(r))["result"]
+        )
+
+
 
     def test_insufficient_funds(self):
         # Create first empty wallet with USD:

@@ -1,4 +1,5 @@
 
+import os
 import unittest
 import time
 import mysql.connector
@@ -67,7 +68,11 @@ class TestWrapper(unittest.TestCase):
 class ClickHouseManager:
     @staticmethod
     def execute(query: str, data=None):
-        client = ClickHouseClient('clickhouse')
+        host = os.environ.get("CLICKHOUSE_HOST")
+        port = os.environ.get("CLICKHOUSE_PORT")
+        user = os.environ.get("CLICKHOUSE_USER")
+        pasw = os.environ.get("CLICKHOUSE_PASSWORD")
+        client = ClickHouseClient(host, port=port, user=user, password=pasw)
         res = client.execute(query, data)
         client.disconnect()
         return res

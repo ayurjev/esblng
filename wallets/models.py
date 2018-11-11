@@ -1,6 +1,9 @@
 
 import os
+from uuid import uuid4
 from datetime import datetime, timedelta
+from clickhouse_driver.client import Client as ClickHouseClient
+
 from envi import microservice
 from mapex import EntityModel, CollectionModel, SqlMapper, Pool, MySqlClient
 from exceptions import UnsupportedCurrency, WalletNotFound, InsufficientFunds, NoConversionRateProvided
@@ -181,7 +184,7 @@ class Wallets(CollectionModel):
     def transfer(
             from_login: str, from_base_currency: int,
             to_login: str, to_base_currency: int,
-            amount: int, convertion_rate_uuid_1: str=None, convertion_rate_uuid_2: str=None) -> bool:
+            amount: int, convertion_rate_uuid_1: str=None, convertion_rate_uuid_2: str=None) -> dict:
         """ Transfers certain amount of money from one wallet to another """
 
         with Wallets.mapper.pool.transaction:
@@ -192,14 +195,126 @@ class Wallets(CollectionModel):
                 raise WalletNotFound()
 
             if amount <= from_wallet.balance:
-                from_wallet.balance -= amount
-                to_wallet.balance += Currencies.Converter.convert(
+
+                converted_amount = Currencies.Converter.convert(
                     amount,
                     from_base_currency, to_base_currency,
                     convertion_rate_uuid_1, convertion_rate_uuid_2
                 )
+
+                from_wallet.balance -= amount
+                to_wallet.balance += converted_amount
                 from_wallet.save()
                 to_wallet.save()
-                return True
+
+                # Everything is ok, but we need to save transaction log
+                # if this fails - the whole sql-tx will be rolled back automatically:
+                tx_uuid = str(uuid4())
+                tx_datetime = datetime.now()
+
+                ClickHouse.save_transaction(
+                    tx_uuid,
+                    from_login, from_base_currency, to_login, to_base_currency,
+                    amount, converted_amount, convertion_rate_uuid_1, convertion_rate_uuid_2,
+                    tx_datetime
+                )
+
+                return {"uuid": tx_uuid, "datetime": tx_datetime}
             else:
                 raise InsufficientFunds()
+    @staticmethod
+    def get_transactions(login: str, period_starts=None, period_ends=None):
+        return ClickHouse.get_transactions(login, period_starts, period_ends)
+
+class ClickHouse:
+
+    def __init__(self):
+        if os.environ.get("DEPLOY_MODE") != "PROD":
+            self.client = ClickHouseClient('clickhouse')
+        else:
+            host = os.environ.get("CLICKHOUSE_HOST")
+            port = os.environ.get("CLICKHOUSE_PORT")
+            user = os.environ.get("CLICKHOUSE_USER")
+            pasw = os.environ.get("CLICKHOUSE_PASSWORD")
+            self.client = ClickHouseClient(host, port=port, user=user, password=pasw)
+
+    def execute(self, query: str, data=None):
+        return self.client.execute(query, data)
+
+    def disconnect(self):
+        self.client.disconnect()
+
+    @staticmethod
+    def save_transaction(
+            tx_uuid: str,
+            from_login: str, from_base_currency: int,
+            to_login: str, to_base_currency: int,
+            original_amount: float, converted_amount: float,
+            cr_uuid1: str, cr_uuid2: str, dt):
+        """ Saving transaction for the history and reports """
+        clickhouse = ClickHouse()
+        clickhouse.execute(
+            "INSERT INTO `outgoing_transactions` "
+            "(`tx_uuid`, `login`, `base_currency`, `amount`, `cr_uuid`, `datetime`) "
+            "VALUES",
+            [
+                {
+                    "tx_uuid": tx_uuid,
+                    "login": from_login,
+                    "base_currency": from_base_currency,
+                    "amount": original_amount,
+                    "cr_uuid": cr_uuid1 or "",
+                    "datetime": dt
+                }
+            ]
+        )
+        clickhouse.execute(
+            "INSERT INTO `incoming_transactions` "
+            "(`tx_uuid`, `login`, `base_currency`, `amount`, `cr_uuid`, `datetime`) "
+            "VALUES",
+            [
+                {
+                    "tx_uuid": tx_uuid,
+                    "login": to_login,
+                    "base_currency": to_base_currency,
+                    "amount": converted_amount,
+                    "cr_uuid": cr_uuid2 or "",
+                    "datetime": dt
+                }
+            ]
+        )
+        clickhouse.disconnect()
+        return True
+
+    @staticmethod
+    def get_transactions(login: str, period_starts=None, period_ends=None):
+        """ Getting transactions history for reports """
+
+        period_starts_bounds, period_ends_bounds = "", ""
+
+        if period_starts:
+            period_starts_bounds = " and `datetime` > '{period_starts.isoformat()}' "
+
+        if period_ends:
+            period_ends_bounds = " and `datetime` < '{period_ends.isoformat()}' "
+
+        clickhouse = ClickHouse()
+        incoming = clickhouse.execute(f"""
+            SELECT 
+            `tx_uuid`, `login`, `base_currency`, round(`amount`, 4), `cr_uuid`, `datetime`
+            FROM `incoming_transactions` WHERE login = '{login}' 
+            {period_starts_bounds} {period_ends_bounds}
+        """)
+
+        outgoing = clickhouse.execute(f"""
+            SELECT 
+            `tx_uuid`, `login`, `base_currency`, round(`amount`, 4), `cr_uuid`, `datetime`
+            FROM `outgoing_transactions` WHERE login = '{login}' 
+            {period_starts_bounds} {period_ends_bounds}
+        """)
+        clickhouse.disconnect()
+
+        return {
+            "incoming": incoming,
+            "outgoing": outgoing
+        }

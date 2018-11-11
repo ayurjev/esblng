@@ -16,3 +16,7 @@ services:
     image: esblng/base/mysql
     env_file:
      - .env
+
+  clickhouse:
+    container_name: clickhouse
+    image: yandex/clickhouse-server

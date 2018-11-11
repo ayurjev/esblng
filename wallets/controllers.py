@@ -1,4 +1,5 @@
 
+from datetime import datetime
 from envi import Controller, Request, response_format
 from models import Wallets
 
@@ -59,3 +60,16 @@ class DefaultController(Controller):
             from_login, from_base_currency, to_login, to_base_currency,
             amount, conversion_rate_uuid_1, conversion_rate_uuid_2
         )
+
+    @classmethod
+    @response_format
+    def get_transactions(cls, request: Request, **kwargs):
+        """ Get history of transactions """
+        login = request.get("login")
+        period_starts = datetime.strptime(request.get("period_starts"), "%c") \
+            if request.get("period_starts", None) else None
+
+        period_ends = datetime.strptime(request.get("period_ends"), "%c") \
+            if request.get("period_ends", None) else None
+
+        return Wallets.get_transactions(login, period_starts, period_ends)
