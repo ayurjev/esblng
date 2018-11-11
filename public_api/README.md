@@ -152,5 +152,3 @@ curl -X POST \
     "conversion_rate2": {"uuid": "576ff813-d370-475d-aa02-c576ef291b96", "value": 2.45, "datetime": "Sun Nov 11 22:04:02 2018", "base_currency": 2}
 }}
 ```
-
-getConvertionRates

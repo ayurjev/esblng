@@ -1,4 +1,4 @@
-# esblng
+# Сборка и автоматические тесты:
 
 
 После клонирования проекта необходимо перейти в каталог orchestration и запускать команды в следующем порядке:
@@ -34,3 +34,13 @@
 ```
 ./down.sh
 ```
+
+
+# Документация по Public Api:
+
+https://github.com/ayurjev/esblng/tree/master/public_api
+
+
+# Документация по Private Api:
+
+https://github.com/ayurjev/esblng/tree/master/private_api
