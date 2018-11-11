@@ -1,0 +1,18 @@
+
+version: '2'
+
+services:
+
+  wallets:
+    container_name: wallets
+    build: .
+    env_file:
+     - .env
+    volumes:
+     - .:/var/www
+
+  db:
+    container_name: db
+    image: registry.dcapi.net/dcpro/main/base/mysql
+    env_file:
+     - .env
