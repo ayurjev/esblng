@@ -107,8 +107,6 @@ class Currencies:
             return amount * convertion_rate_value_1 / convertion_rate_value_2
 
 
-
-
 class WalletsMapper(SqlMapper):
     """ describes relations between py-models and database structure """
     pool = pool
