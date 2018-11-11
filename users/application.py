@@ -1,8 +1,8 @@
 
 """
-Microservice `auth`
+Microservice `users`
 
-Registration and authentication layer
+Personal user's data layer
 """
 
 from dc.envi import Application

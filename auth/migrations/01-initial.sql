@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS `credentials` (
     `Password` varchar(32) NOT NULL,
     `Token` varchar(32) NOT NULL,
     `Created` datetime NOT NULL,
-    PRIMARY KEY (`Login`)
+    PRIMARY KEY (`Login`),
+    KEY (`Token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
